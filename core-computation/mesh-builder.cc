@@ -623,12 +623,18 @@ void buildQuadMeshPartFromMshFile(const char* in_filename, const char* out_filen
   // Function to read lines
   auto readLine = [&in, &line, max_line_length] () {
     in.getline(line, max_line_length);
+    // check(in.good(), "Error reading line");
+    return in.good() ? line : NULL;
+  };
+
+  auto readAndCheckLine = [&in, &line, max_line_length] () {
+    in.getline(line, max_line_length);
     check(in.good(), "Error reading line");
     return line;
   };
 
   // Read nodes section
-  while (!match(readLine(), "$Nodes"));
+  while (!match(readAndCheckLine(), "$Nodes"));
 
   int num_nodes;
   check(in >> num_nodes, "Failed to read num_nodes");

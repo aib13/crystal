@@ -50,7 +50,7 @@ export PKG_CONFIG_PATH = ${PROTO_LIB_PATH}/lib/pkgconfig/
 INTELFLAGS=-vec-report0 -xHost -static-intel -ipo -inline-level=2 -no-inline-factor
 
 CC = icc
-CFLAGS = -Wall -O3 ${INTELFLAGS}
+CFLAGS = -Wall -O3 ${INTELFLAGS} 
 
 CXX = icpc
 CXXFLAGS = -std=c++11 -Wall -Ithird-party -Iobj `pkg-config --cflags protobuf` -O3 ${INTELFLAGS} ${FLAGS}
@@ -83,6 +83,7 @@ $(PROTO_LIB_PATH)/bin/protoc $(PROTO_LIB_PATH)/lib $(PROTO_LIB_PATH)/include:
 run-builder: $(BINDIR)/run-builder
 
 $(BINDIR)/run-builder: ${CORECOMP}/run-builder.cc ${CORECOMP}/mesh-builder.cc $(ZIP_SRC_PATH)/izipfile.cpp $(ZIP_SRC_PATH)/ozipfile.cpp $(ZIP_LIB_PATH)/zip.o $(ZIP_LIB_PATH)/unzip.o $(PROTOGENDIR)/mesh.pb.cc ${CORECOMP}/mesh.h ${CORECOMP}/utils.h $(PROTOGENDIR)/mesh.pb.h | $(BINDIR)
+	echo $@ — $<
 	$(CXX) -o $@ $< ${CORECOMP}/mesh-builder.cc $(PROTOGENDIR)/mesh.pb.cc $(ZIP_SRC_PATH)/izipfile.cpp $(ZIP_SRC_PATH)/ozipfile.cpp $(ZIP_LIB_PATH)/zip.o $(ZIP_LIB_PATH)/unzip.o $(CXXFLAGS) $(LFLAGS) $(LIBS)
 
 

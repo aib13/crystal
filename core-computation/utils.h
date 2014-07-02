@@ -75,6 +75,12 @@ inline static void check(const bool success, const Arguments&... args) {
 }
 
 
+// A catch-all hack to enable implicit boolean conversion
+template <typename BOOLABLE, typename... Arguments>
+inline static void check(const BOOLABLE& boolable, const Arguments&... args) {
+  check(!!boolable, args...);
+}
+
 // Iterator that runs in the range ['from', 'to')
 class IterAtoB {
   public:
