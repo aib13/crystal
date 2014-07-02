@@ -85,10 +85,36 @@ static inline void run_structured_cells(
 #else
     const int cell_region_four_compass_index = cell_region.four_compass_index;
 #endif
+
+    //defining the array of indexes
+    const int index[] = {0,1,2,3};
+
+    //defining the array of the compass values in terms of the array indexes
+    const int compass[] = {
+
+      FourCompass[cell_region.four_compass_index][index[0]],
+      FourCompass[cell_region.four_compass_index][index[1]],
+      FourCompass[cell_region.four_compass_index][index[2]],
+      FourCompass[cell_region.four_compass_index][index[3]],
+
+    };
+
+
+    //defining the compass it terms of the computed array
+    const int inv_compass_0 = inv_compass[0];
+    const int inv_compass_1 = inv_compass[1];
+    const int inv_compass_2 = inv_compass[2];
+    const int inv_compass_3 = inv_compass[3];
+
+    /*
+
     const int inv_compass_0 = FourCompass[cell_region.four_compass_index][0];
     const int inv_compass_1 = FourCompass[cell_region.four_compass_index][1];
     const int inv_compass_2 = FourCompass[cell_region.four_compass_index][2];
     const int inv_compass_3 = FourCompass[cell_region.four_compass_index][3];
+
+    */
+    
     //const int inv_compass[4] = FourCompass[cell_region.four_compass_index];
 
     const int old_cells_processed = cells_processed;
@@ -98,13 +124,17 @@ static inline void run_structured_cells(
     const int node_col_finish = cell_region.node_col_finish;
     for (int r =  node_row_start ; r < node_row_finish ; ++r) {
       for (int c = node_col_start ; c < node_col_finish ; ++c) {
+          
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // IMPORTANT: the ordering here must be consistent with the compass ordering
+
         // See 'Quad.getNodes' (python)
         const int nodes[] = {
           nodes_offset + conv2d(r, c),
           nodes_offset + conv2d(r, c+1),
           nodes_offset + conv2d(r+1, c),
           nodes_offset + conv2d(r+1, c+1)
+            
         };
 
         // Orient nodes based on compass value
