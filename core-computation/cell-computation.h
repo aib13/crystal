@@ -86,8 +86,11 @@ static inline void run_structured_cells(
     const int cell_region_four_compass_index = cell_region.four_compass_index;
 #endif
 
-    //defining the array of indexes
+    //defining the array of indexes that will be obtained with a function
     const int index[] = {0,1,2,3};
+
+    //initialise the index array with the values
+
 
     //defining the array of the compass values in terms of the array indexes
     const int compass[] = {
@@ -101,10 +104,10 @@ static inline void run_structured_cells(
 
 
     //defining the compass it terms of the computed array
-    const int inv_compass_0 = inv_compass[0];
-    const int inv_compass_1 = inv_compass[1];
-    const int inv_compass_2 = inv_compass[2];
-    const int inv_compass_3 = inv_compass[3];
+    const int inv_compass_0 = compass[0];
+    const int inv_compass_1 = compass[1];
+    const int inv_compass_2 = compass[2];
+    const int inv_compass_3 = compass[3];
 
     /*
 
