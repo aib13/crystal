@@ -85,6 +85,7 @@ static inline void run_structured_cells(
 #else
     const int cell_region_four_compass_index = cell_region.four_compass_index;
 #endif
+    
     const int inv_compass_0 = FourCompass[cell_region.four_compass_index][0];
     const int inv_compass_1 = FourCompass[cell_region.four_compass_index][1];
     const int inv_compass_2 = FourCompass[cell_region.four_compass_index][2];
@@ -96,6 +97,7 @@ static inline void run_structured_cells(
     const int node_row_finish = cell_region.node_row_finish;
     const int node_col_start = cell_region.node_col_start;
     const int node_col_finish = cell_region.node_col_finish;
+
     for (int r =  node_row_start ; r < node_row_finish ; ++r) {
       for (int c = node_col_start ; c < node_col_finish ; ++c) {
         // IMPORTANT: the ordering here must be consistent with the compass ordering
