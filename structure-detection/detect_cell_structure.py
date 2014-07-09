@@ -6,7 +6,7 @@ from magic_iterators import indices_of, intersection, pairwise, renumber_keys, u
 Quad = namedtuple('Quad', ['row1', 'row2', 'col1', 'col2', 'r1c1', 'r1c2', 'r2c1', 'r2c2', 'first_in_row'])
 
 # IMPORTANT: This defines the compass ordering
-Quad.getNodes = lambda self: (self.r1c1, self.r1c2, self.r2c2, self.r2c1)
+Quad.getNodes = lambda self: (self.r1c1, self.r1c2, self.r2c1, self.r2c2)
 
 def _pairwise_enumerate_2d(grid2d, row_offset=0, col_offset=0):
     for (r1_idx, r1_lst), (r2_idx, r2_lst) in pairwise(enumerate(grid2d, row_offset)):

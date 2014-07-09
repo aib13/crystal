@@ -276,6 +276,21 @@ inline void update(
     res[n] = 0.0f;
     *rms  += del*del;
   }
+
+  /*
+  ofstream myfile;
+  myfile.open("temp1.txt");
+
+  
+  for(int n = 0 ; n < 4; ++n) {
+    myfile << q[n] << " ";
+    //printf("%f",q[n]);
+  }
+
+  myfile << endl;
+
+  */
+  
 }
 
 #endif
