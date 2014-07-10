@@ -1,6 +1,6 @@
 *.dat
 *.p
 *.p.part
-*.DS_Store
+.DS_Store
 *.msh
 *.pyc
