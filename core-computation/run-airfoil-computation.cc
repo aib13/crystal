@@ -92,7 +92,8 @@ int main(int argc, const char* argv[]) {
     long sum_res = 0;
     for (const auto& x : p_res) {
       for (const auto& y : x) {
-        sum_res ^= *reinterpret_cast<const long*>(&y);
+
+    sum_res ^= *reinterpret_cast<const long*>(&y);
       }
     }
     printf("pres: %ld\n", sum_res);
@@ -201,7 +202,7 @@ int main(int argc, const char* argv[]) {
     // printf("\n**ITER %d**\n", iter);
     // checksum();
   }
-  write_quad_data(p_q, "out_my_data.dat");
+  write_quad_data(p_q, "out_my_data4.dat");
   timer.lapAndPrint("Completed!");
   // printf("%d  %10.5e \n",niter,rms);
 }

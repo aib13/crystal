@@ -5,6 +5,10 @@
 #include <cmath>
 #include <tuple>
 #include <vector>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 
 #include "mesh.h"
 #include "utils.h"
@@ -13,8 +17,6 @@ using std::array;
 using std::get;
 using std::tuple;
 using std::vector;
-
-
 
 
 //// CONSTANTS
@@ -277,14 +279,13 @@ inline void update(
     *rms  += del*del;
   }
 
-  /*
+/*
   ofstream myfile;
   myfile.open("temp1.txt");
 
-  
-  for(int n = 0 ; n < 4; ++n) {
-    myfile << q[n] << " ";
-    //printf("%f",q[n]);
+  for(int i1 = 0 ; i1 < 4; ++i1) {
+    //myfile << q[i1] << " ";
+    printf("%f ",q[i1]);
   }
 
   myfile << endl;
