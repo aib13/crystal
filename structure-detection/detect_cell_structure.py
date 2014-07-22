@@ -6,7 +6,7 @@ from magic_iterators import indices_of, intersection, pairwise, renumber_keys, u
 Quad = namedtuple('Quad', ['row1', 'row2', 'col1', 'col2', 'r1c1', 'r1c2', 'r2c1', 'r2c2', 'first_in_row'])
 
 # IMPORTANT: This defines the compass ordering
-Quad.getNodes = lambda self: (self.r1c1, self.r2c1, self.r1c2, self.r2c2)
+Quad.getNodes = lambda self: (self.r1c1, self.r1c2, self.r2c1, self.r2c2)
 
 def _pairwise_enumerate_2d(grid2d, row_offset=0, col_offset=0):
     for (r1_idx, r1_lst), (r2_idx, r2_lst) in pairwise(enumerate(grid2d, row_offset)):
@@ -16,16 +16,22 @@ def _pairwise_enumerate_2d(grid2d, row_offset=0, col_offset=0):
                         r1c1=r1c1, r1c2=r1c2, r2c1=r2c1, r2c2=r2c2, first_in_row=first_in_row)
             first_in_row = False
 
+
+# def _establish_ordering_in_neighbor_visiting(CellStructureFromNodeStructure):
+
+
+
 def _invert_cell2ordnodes(cell2ordnodes):
     node2ordcells = defaultdict(lambda: [-1, -1, -1, -1])
 
-    for cell_id, nodes in enumerate(cell2ordnodes):
         for direction, node_id in enumerate(nodes):
             assert node_id != -1
+    for cell_id, nodes in enumerate(cell2ordnodes):
             assert node2ordcells[node_id][direction] == -1, "Multiple nodes adjacent to the same cell from the same direction: cell %d and node %d" % (cell_id, node_id)
             node2ordcells[node_id][direction] = cell_id
 
     return node2ordcells
+
 
 def _print_partial_region(header, region):
     print header
