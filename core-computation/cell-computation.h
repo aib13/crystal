@@ -103,10 +103,10 @@ static inline void run_structured_cells(
         // IMPORTANT: the ordering here must be consistent with the compass ordering
         // See 'Quad.getNodes' (python)
         const int nodes[] = {
-          nodes_offset + conv2d(r, c),
-          nodes_offset + conv2d(r+1, c),
           nodes_offset + conv2d(r, c+1),
-          nodes_offset + conv2d(r+1, c+1)
+          nodes_offset + conv2d(r+1, c+1),
+          nodes_offset + conv2d(r+1, c),
+          nodes_offset + conv2d(r, c)
         };
 
         // Orient nodes based on compass value

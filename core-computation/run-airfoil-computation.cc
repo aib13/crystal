@@ -202,7 +202,7 @@ int main(int argc, const char* argv[]) {
     // printf("\n**ITER %d**\n", iter);
     // checksum();
   }
-  write_quad_data(p_q, "out_my_data6.dat");
+  write_quad_data(p_q, "out_my_data_n2.dat");
   timer.lapAndPrint("Completed!");
   // printf("%d  %10.5e \n",niter,rms);
 }
