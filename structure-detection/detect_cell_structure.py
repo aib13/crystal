@@ -17,6 +17,13 @@ def _contains(small, big):
             return False
     return True
 
+def _difference(a, b):
+    new_list = []
+    for element in a:
+        if element not in b:
+            new_list.append(element)
+    return new_list
+
 def _build_the_cell2cells_map(cell2ordnodes):
     cell2cells = defaultdict(list)
 
@@ -226,6 +233,20 @@ def _find_a_starting_quad_and_its_region(cell2ordnodes, cell2cells):
         if (south_cell != -1):
 
             for cell in _grow_a_row_in_south(used_cells, region[current], cell2cells, cell2ordnodes, current, node_1, node_2):
+                if cell not in region[south_cell]:
+                    region[south_cell].append(cell)
+
+        remaining_nodes = _difference(cell2ordnodes[current], [node_1, node_2])
+
+        print "We are now searching in south into the direction: "
+        print "node_3: ", remaining_nodes[0]
+        print "node_4: ", remaining_nodes[1]
+
+        print "south row in east: ", _grow_a_row_in_south(used_cells, region[current], cell2cells, cell2ordnodes, current, remaining_nodes[0], remaining_nodes[1])
+
+        if (south_cell != -1):
+
+            for cell in _grow_a_row_in_south(used_cells, region[current], cell2cells, cell2ordnodes, current, remaining_nodes[0], remaining_nodes[1]):
                 if cell not in region[south_cell]:
                     region[south_cell].append(cell)
 
