@@ -8,13 +8,253 @@ Quad = namedtuple('Quad', ['row1', 'row2', 'col1', 'col2', 'r1c1', 'r1c2', 'r2c1
 # IMPORTANT: This defines the compass ordering
 Quad.getNodes = lambda self: (self.r1c1, self.r1c2, self.r2c1, self.r2c2)
 
-def _pairwise_enumerate_2d(grid2d, row_offset=0, col_offset=0):
-    for (r1_idx, r1_lst), (r2_idx, r2_lst) in pairwise(enumerate(grid2d, row_offset)):
-        first_in_row = True
-        for (c1_idx, (r1c1, r2c1)), (c2_idx, (r1c2, r2c2)) in pairwise(enumerate(izip(r1_lst, r2_lst), col_offset)):
-            yield Quad(row1=r1_idx, row2=r2_idx, col1=c1_idx, col2=c2_idx,
-                        r1c1=r1c1, r1c2=r1c2, r2c1=r2c1, r2c2=r2c2, first_in_row=first_in_row)
-            first_in_row = False
+def _intersect(a, b):
+    return list(set(a) & set(b))
+
+def _contains(small, big):
+    for i in small:
+        if (not (i in big)):
+            return False
+    return True
+
+def _build_the_cell2cells_map(cell2ordnodes):
+    cell2cells = defaultdict(list)
+
+    for cell_id1, nodes1 in enumerate(cell2ordnodes):
+        for cell_id2, nodes2 in enumerate(cell2ordnodes):
+            if (cell_id1 < cell_id2):
+                common_nodes = _intersect(nodes1, nodes2)
+                if (len(common_nodes) == 2):
+                    cell2cells[cell_id1].append(cell_id2)
+                    cell2cells[cell_id2].append(cell_id1)
+
+    return cell2cells
+
+def _build_the_node2cells_map(region, cell2ordnodes):
+
+    node2cells = defaultdict(list)
+
+    for cell_id in region:
+
+        # Add the cell to the corresponding nodes
+
+        for node in cell2ordnodes[cell_id]:
+            if cell_id not in node2cells[node]:
+                node2cells[node].append(cell_id)
+        
+        # Add the adjacent cells to the corresponding nodes 
+        for cell in region[cell_id]:
+            
+            for node in cell2ordnodes[cell]:
+                if cell not in node2cells[node]:
+                    node2cells[node].append(cell)
+
+
+    return node2cells
+
+def _grow_a_row(cell2cells, cell2ordnodes, start_cell, node_1, node_2):
+    
+    row = []
+    #defaultdict(list)
+    
+    current_cell = start_cell
+
+    if( current_cell != -1 ):
+    
+        row.append(start_cell)
+
+        # Extract the current_cell's adjacent list of cells
+        list_adjacent_cells = cell2cells[current_cell]
+
+        current_node_1 = node_1
+        current_node_2 = node_2
+
+        for num in range(1,10):
+
+            for adjacent_cell in list_adjacent_cells:
+
+                if (adjacent_cell not in row):
+
+                    if (current_node_1 in cell2ordnodes[adjacent_cell]) and (current_node_2 in cell2ordnodes[adjacent_cell]): 
+
+                        # We have found an adjacent cell
+
+                        # Append the cell to the detected region
+                        row.append(adjacent_cell)
+            
+                        # Find the common nodes between cell and current_cell
+                        common_nodes = _intersect(cell2ordnodes[adjacent_cell], cell2ordnodes[current_cell])
+            
+                        # Find the list of uncommon nodes
+                        uncommon_nodes = [ node for node in cell2ordnodes[adjacent_cell] if node not in common_nodes ]
+        
+                        # Set the direction, 
+                        j = iter(uncommon_nodes)
+                        if(len (uncommon_nodes) != 2):
+                            return row
+                        else:
+                            current_node_1 = j.next()
+                            current_node_2 = j.next()
+
+                        # Reset the current cell
+                        current_cell = adjacent_cell
+                        list_adjacent_cells = cell2cells[current_cell]
+
+    return row
+
+def _give_the_south_cell(used_cells, detected_row, cell2cells, cell2ordnodes, start_cell, node_1, node_2):
+
+    list_adjacent_cells = cell2cells[start_cell]
+
+    unused_nodes = [ node for node in cell2ordnodes[start_cell] if (node != node_1 and node != node_2) ]
+
+    # Find one of the "north" and "south" cells
+
+    for adjacent_cell in list_adjacent_cells:
+        if (adjacent_cell not in detected_row) and (adjacent_cell not in used_cells): 
+            if (not _contains(unused_nodes, cell2ordnodes[adjacent_cell])):
+                return adjacent_cell
+            
+    return -1
+
+def _grow_a_row_in_south(used_cells, detected_row, cell2cells, cell2ordnodes, start_cell, node_1, node_2):
+
+    south_row = []
+
+    # Find one of the "north" and "south" cells
+    south_cell = _give_the_south_cell(used_cells, detected_row, cell2cells, cell2ordnodes, start_cell, node_1, node_2)
+            
+    south_row.append(south_cell)
+
+    nodes = []
+
+    common_nodes_between_start_cell_and_south_cell = _intersect(cell2ordnodes[start_cell], cell2ordnodes[south_cell])
+
+    for node in common_nodes_between_start_cell_and_south_cell:
+        if node not in nodes:
+            nodes.append(node)
+
+    for node in cell2ordnodes[south_cell]:
+        if node not in nodes:
+            nodes.append(node)
+
+    current = south_cell
+
+
+    for num in range(0, len(detected_row) - 1):
+
+        advance = 0;
+
+        for node in cell2ordnodes[detected_row[num+1]]:
+            if node not in nodes:
+                nodes.append(node)
+
+        for adjacent_cell in cell2cells[current]:
+
+            if (len(_intersect(nodes, cell2ordnodes[adjacent_cell])) == 3) and (adjacent_cell not in south_row) and (adjacent_cell not in detected_row): 
+
+                    # We have found a south adjacent cell
+
+                    # Append the cell to the detected region
+                    south_row.append(adjacent_cell)
+            
+                    # Next step
+                    current = adjacent_cell
+
+                    for node in cell2ordnodes[adjacent_cell]:
+                        if node not in nodes:
+                            nodes.append(node)
+
+                    advance = 1
+
+                    break
+        if advance != 1:
+            break
+
+    return south_row
+
+
+def _find_a_starting_quad_and_its_region(cell2ordnodes, cell2cells):
+
+    # Find 2 adjacent cells (2 cells that have a common cell)
+    # Obtain a key - cell1
+
+    for start_cell in range (0, 10):
+        if (len( cell2cells[start_cell] ) != 0) :
+            break
+
+    list_adjacent_cells_of_start_cell = cell2cells[start_cell]
+
+    cell2 = list_adjacent_cells_of_start_cell[0]
+
+    region = defaultdict(list)
+
+    # Find the common edge
+    common_nodes = _intersect(cell2ordnodes[start_cell], cell2ordnodes[cell2])
+
+    for cell in _grow_a_row(cell2cells, cell2ordnodes, start_cell, common_nodes[0], common_nodes[1]):
+        region[start_cell].append(cell)
+
+    current = start_cell
+    node_1 = common_nodes[0]
+    node_2 = common_nodes[1]
+    used_cells = []
+
+    while ( current != -1 ):
+
+        if (current != -1):
+            used_cells.append(current)
+
+        south_cell = _give_the_south_cell(used_cells, region[current], cell2cells, cell2ordnodes, current, node_1, node_2)
+        
+
+        print "START CELL: ", current
+        print "SOUTH CELL: ", south_cell
+
+        print "We are now searching in south into the direction: "
+        print "node 1: ", node_1
+        print "node 2: ", node_2
+        
+
+        if (south_cell not in region[south_cell]):
+            if (south_cell != -1):
+                region[south_cell].append(south_cell)
+
+
+        print "south row: ", _grow_a_row_in_south(used_cells, region[current], cell2cells, cell2ordnodes, current, node_1, node_2)
+
+        if (south_cell != -1):
+
+            for cell in _grow_a_row_in_south(used_cells, region[current], cell2cells, cell2ordnodes, current, node_1, node_2):
+                if cell not in region[south_cell]:
+                    region[south_cell].append(cell)
+
+
+        node2cells = _build_the_node2cells_map(region, cell2ordnodes)
+
+        print "detected region: ", region
+        print
+
+        node_1 = -1
+        node_2 = -1
+
+        common_nodes = _intersect(cell2ordnodes[current], cell2ordnodes[south_cell])
+
+        for node_id in node2cells: 
+            if ( len(node2cells[node_id]) == 4 )  and ( current in node2cells[node_id] )  and ( node_id in common_nodes ) :
+                node_1 = node_id
+            
+        for node_id in node2cells: 
+            if ( len(node2cells[node_id]) == 2 )  and ( south_cell in node2cells[node_id] ) and not ( node_id in common_nodes ) :
+                node_2 = node_id
+
+
+        current = south_cell
+    
+    return region
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 def _invert_cell2ordnodes(cell2ordnodes):
     node2ordcells = defaultdict(lambda: [-1, -1, -1, -1])
@@ -30,14 +270,16 @@ def _invert_cell2ordnodes(cell2ordnodes):
 def _print_partial_region(header, region):
     print header
     row_max = min(3, len(region))
-    col_max = min(10, len(region[0]))
+    col_max = min(10, len(region[0]))	
 
     for row in region[:row_max]:
         print row[:col_max], '...'
     print '...'
 
+def _find_a_starting_quad(node_region, node2ordcells, cell2cells):
 
-def _find_topleftmost_structured_quad(node_region, node2ordcells):
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     # Find the top-left quad
     for quad in _pairwise_enumerate_2d(node_region):
         quad_nodes_to_cells = [ node2ordcells[n] for n in quad.getNodes() ]
@@ -50,10 +292,12 @@ def _find_topleftmost_structured_quad(node_region, node2ordcells):
         # Multiple cells in common - wraparound case
         if len(common_cells) > 1: raise NotImplementedError('Wraparound case')
 
+        # !!!!!!!!!!!!!!!!!!!!!!! WAEL THINK I SHOULD CHANGE THINGS HERE
         # Get the unique cell that is adjacent to all four nodes
         this_cell = iter(common_cells).next()
 
         # Get all directions that point to this_cell
+
         matching_directions = [ indices_of(this_cell, cs) for cs in quad_nodes_to_cells ]
         assert all(len(n) == 1 for n in matching_directions), "A node is pointing to the same cell multiple times!"
 
@@ -63,9 +307,7 @@ def _find_topleftmost_structured_quad(node_region, node2ordcells):
 
         # End search
         return quad, compass
-
-    # None found!
-    raise NotImplementedError("NO CELL REGION INNIT! :'(")
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 def _find_remaining_structure(topleft_quad, compass, node_region, node2ordcells):
@@ -196,6 +438,7 @@ class CellStructureFromNodeStructure(object):
     """Given structured node regions, derives structured cell regions"""
     def __init__(self, structured_node_regions, cell2ordnodes):
         num_cells = len(cell2ordnodes)
+
         node2ordcells = _invert_cell2ordnodes(cell2ordnodes)
 
         structured_cell_regions = []
@@ -204,7 +447,7 @@ class CellStructureFromNodeStructure(object):
             _print_partial_region('Structured node region:', node_region)
 
             # Extract cell structured region
-            topleft_quad, compass = _find_topleftmost_structured_quad(node_region, node2ordcells)
+            topleft_quad, compass = _find_a_starting_quad(node_region, node2ordcells)
             cell_region = _find_remaining_structure(topleft_quad, compass, node_region, node2ordcells)
             structured_cell_regions.append(cell_region)
 
